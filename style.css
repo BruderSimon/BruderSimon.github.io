@@ -1,0 +1,101 @@
+:root {
+    --sumiInk-1b: #181820;
+    --sumiInk-3: #363646;
+    --fujiWhite: #DCD7BA;
+    --samuraiRed: #E82424;
+    --autumnRed: #C34043;
+    --peachRed: #FF5D62;
+    --waveRed: #E46876;
+    --dragonBlue: #658594;
+    --oniViolet: #957FB8;
+    --sakuraPink: #D27E99;
+    --springGreen: #98BB6C;
+    --carpYellow: #E6C384;
+    --waveAqua2: #7AA89F;
+    --springViolet2: #9CABCA;
+    --surimiOrange: #FFA066;
+    --boatYellow2: #C0A36E;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: monospace;
+    font-size: 1.2rem;
+    background-color: var(--sumiInk-1b);
+    color: var(--fujiWhite);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+.pages{
+    text-align: center;
+}
+
+.pages a{
+    text-decoration: none;
+    text-align: center;
+    color: var(--dragonBlue);
+}
+
+.container {
+    text-align: left;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.container .avatar {
+    text-align: center;
+    padding: 20px;
+}
+
+.avatar img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.svg-inline {
+    width: 1em; 
+    height: 1em;
+    vertical-align: middle;
+    fill: var(--fujiWhite);
+}
+
+.socials a {
+    color: var(--springGreen);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.socials a:hover {
+    color: var(--sakuraPink);
+}
+
+h1 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: var(--peachRed);
+}
+
+h2 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    color: var(--springViolet2);
+}
+
+p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.highlightedWord {
+    color: var(--surimiOrange);
+}
