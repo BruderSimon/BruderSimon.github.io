@@ -55,7 +55,7 @@ let selectedFile = null;
 
 document.getElementById('fileInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith(".pdf"))) {
 	selectedFile = file;
 	document.getElementById('fileName').textContent = file.name;
 	document.getElementById('fileSelected').classList.add('show');
@@ -73,7 +73,7 @@ dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith(".pdf"))) {
 	selectedFile = file;
 	document.getElementById('fileName').textContent = file.name;
 	document.getElementById('fileSelected').classList.add('show');
@@ -125,7 +125,7 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 	);
 
 	progressFill.style.width = '60%';
-	status.textContent = 'Decrypt...';
+	status.textContent = 'Encrypt...';
 
 	const encrypted = await crypto.subtle.encrypt(
             { name: 'AES-GCM', iv },
