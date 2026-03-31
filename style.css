@@ -421,44 +421,20 @@ li p {
     flex: 1;
 }
 
-.pin-section { margin-top: 1.5rem; }
-
-.pin-inputs {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.pin-inputs input {
-    width: 48px;
-    height: 56px;
-    background: var(--sumiInk-1b);
-    border: 1px solid var(--oniViolet);
-    color: var(--fujiWhite);
-    font-family: monospace;
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.pin-inputs input:focus {
+.password-input{
+    width:50%;
+    padding:0.6rem;
+    font-size:1rem;
     border-color: var(--sakuraPink);
     background: var(--sumiInk-3);
+    color: var(--fujiWhite);
+    outline: none;
 }
-.pin-inputs.shake {
+.password-section {
+    margin-top: 1.5rem;
+}
+.password-inputs.shake {
     animation: shake 0.4s ease;
-}
-.pin-confirm {
-    margin-top: 1rem;
-}
-
-.pin-match {
-    font-family: monospace;
-    font-size: 0.7rem;
-    margin-top: 0.5rem;
-    height: 1rem;
 }
 
 .pin-match.ok { color: var(--springGreen); }
