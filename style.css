@@ -244,6 +244,7 @@ li p {
 }
 
 .tag {
+    font-family: monospace;
     background-color: var(--sumiInk-1b);
     color: var(--springGreen);
     padding: 0.3rem 0.8rem;
@@ -320,4 +321,217 @@ li p {
     .home-link, .pages a, .socials a {
         padding: 0.75rem 1rem;
     }
+}
+
+/* Encryption Page */
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.card {
+    /* background: var(--sumiInk-3); */
+    /* border: 1px solid var(--sumiInk-3); */
+    padding: 2rem;
+    margin-bottom: 1rem;
+}
+
+.label {
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: var(--springViolet2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+
+.drop-zone {
+    border: 1px dashed var(--sumiInk-3);
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--sakuraPink);
+    background: var(--sumiInk-3);
+}
+
+.drop-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.drop-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.4;
+}
+
+.drop-text {
+    font-size: 0.85rem;
+    color: var(--dragonBlue);
+}
+
+.drop-text strong {
+    color: var(--fujiWhite);
+}
+
+.file-selected {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--sumiInk-3);
+    border: 1px solid var(--sakuraPink);
+    margin-top: 1rem;
+}
+
+.file-selected.show { display: flex; }
+
+.file-icon {
+    font-family: monospace;
+    font-size: 0.65rem;
+    background: var(--sakuraPink);
+    color: #000;
+    padding: 0.25rem 0.4rem;
+    font-weight: 600;
+}
+
+.file-name {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.pin-section { margin-top: 1.5rem; }
+
+.pin-inputs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.pin-inputs input {
+    width: 48px;
+    height: 56px;
+    background: var(--sumiInk-1b);
+    border: 1px solid var(--oniViolet);
+    color: var(--fujiWhite);
+    font-family: monospace;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pin-inputs input:focus {
+    border-color: var(--sakuraPink);
+    background: var(--sumiInk-3);
+}
+
+.pin-confirm {
+    margin-top: 1rem;
+}
+
+.pin-match {
+    font-family: monospace;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    height: 1rem;
+}
+
+.pin-match.ok { color: var(--springGreen); }
+.pin-match.fail { color: var(--samuraiRed); }
+
+.btn {
+    width: 100%; 
+    padding: 1rem;
+    background: var(--sumiInk-3);
+    color: #000;
+    border: none;
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1.5rem;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--surimiOrange);
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.progress-bar {
+    display: none;
+    height: 2px;
+    background: var(--sakuraPink);
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-bar.show { display: block; }
+
+.progress-fill {
+    height: 100%;
+    background: var(--sumiInk-3);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.status {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--sumiInk-3);
+    margin-top: 0.75rem;
+    min-height: 1.2rem;
+}
+.status.success { color: var(--springGreen); }
+.status.error { color: var(--samuraiRed); }
+
+.info-box {
+    border: 1px solid var(--sumiInk-3);
+    padding: 1rem 1.25rem;
+    font-size: 0.8rem;
+    color: var(--dragonBlue);
+    line-height: 1.6;
+}
+
+.info-box strong {
+    color: var(--fujiWhite);
+    font-family: monospace;
+    font-size: 0.7rem;
+}
+
+.step-list {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+}
+
+.step-list li {
+    margin-bottom: 0.25rem;
+}
+
+.step-list code {
+    font-family: monospace;
+    color: var(--surimiOrange);
+    font-size: 0.75rem;
 }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Encryption</title>
+<link rel="stylesheet" href="./../style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="tag">AES-256 Encryption</div>
+    <h1>PDF <span style="color: var(--surimiOrange)">Encrypt</span><br> Tool</h1>
+  </div>
+
+  <div class="card">
+    <div class="label">1 — Choose PDF</div>
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf">
+      <div class="drop-icon">⬆</div>
+      <div class="drop-text"><strong>Drag and drop PDF or click to choose</strong><br>Only .pdf files</div>
+    </div>
+    <div class="file-selected" id="fileSelected">
+      <span class="file-icon">PDF</span>
+      <span class="file-name" id="fileName"></span>
+    </div>
+
+    <div class="pin-section">
+      <div class="label">2 — 6-stelligen PIN eingeben</div>
+      <div class="pin-inputs" id="pin1Inputs">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+      </div>
+    </div>
+
+    <div class="pin-confirm">
+      <div class="label">3 — PIN bestätigen</div>
+      <div class="pin-inputs" id="pin2Inputs">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+        <input type="password" inputmode="numeric" maxlength="1" placeholder="·">
+      </div>
+      <div class="pin-match" id="pinMatch"></div>
+    </div>
+
+    <button class="btn" id="encryptBtn" disabled>Datei verschlüsseln & herunterladen</button>
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="info-box">
+    <strong>So geht's weiter:</strong>
+    <ol class="step-list">
+      <li>Verschlüsselte Datei <code>presentation.enc</code> herunterladen</li>
+      <li>Datei + <code>viewer.html</code> ins GitHub-Repo laden</li>
+      <li>In <code>viewer.html</code> den Dateinamen anpassen</li>
+      <li>Fertig — nur du kommst rein mit dem PIN</li>
+    </ol>
+  </div>
+</div>
+<script src="encrypt.js"></script>
+</body>
+</html>
