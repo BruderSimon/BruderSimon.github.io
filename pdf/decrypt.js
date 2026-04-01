@@ -48,7 +48,7 @@ unlockBtn.addEventListener('click', async () => {
 	// Derive key
 	const enc = new TextEncoder();
 	const keyMaterial = await crypto.subtle.importKey(
-            'raw', enc.encode(ppassword), 'PBKDF2', false, ['deriveKey']
+            'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
 	);
 	const key = await crypto.subtle.deriveKey(
             { name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' },
