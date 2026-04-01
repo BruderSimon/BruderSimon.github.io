@@ -1,91 +1,49 @@
-// =============================================
-// KONFIGURATION — hier Dateinamen anpassen!
-// =============================================
-const ENCRYPTED_FILE = 'presentation.enc'; // <-- Dateiname deiner .enc Datei
-// =============================================
-
 const passwordInputs = document.getElementById("passwordInput");
+const unlockBtn = document.getElementById('unlockBtn');
 const errorMsg = document.getElementById('errorMsg');
 const loadingMsg = document.getElementById('loadingMsg');
 
-
-function clearPassword() {
-    password = "";
-    passwordInputs.focus();
-}
-
-function shakePassword() {
-    const row = document.getElementById('passwordInput');
-    row.classList.add('shake');
-    row.addEventListener('animationend', () => row.classList.remove('shake'), { once: true });
-}
-
-// Auto-focus input
 passwordInputs.focus();
 
-// Unlock
+function shakePassword() {
+    passwordInputs.classList.add('shake');
+    passwordInputs.addEventListener('animationend', () => passwordInputs.classList.remove('shake'), { once: true });
+}
+
+const b2u = b => Uint8Array.from(atob(b), c => c.charCodeAt(0));
+
+async function deriveKey(password, salt) {
+    const result = await argon2.hash({
+        pass: password, uint8ToBase64(salt),
+        type: argon2.ArgonType.Argon2id,
+        hashLen: 32, time: 3, mem: 65536, parallelism: 1});
+    return crypto.subtle.importKey("raw", result.hash, { name: "AES-GCM" }, false, ["decrypt"]);
+}
+
 unlockBtn.addEventListener('click', async () => {
-    const password = passwordInputs.value;
     errorMsg.textContent = '';
-    loadingMsg.textContent = 'Load file...';
-
+    loadingMsg.textContent = 'Decrypt...';
     try {
-	// Fetch encrypted file
-	const response = await fetch(ENCRYPTED_FILE);
-	if (!response.ok) throw new Error('File not found: ' + ENCRYPTED_FILE);
-
-	loadingMsg.textContent = 'Decrypt...';
-	const fileData = new Uint8Array(await response.arrayBuffer());
-
-	// Parse format: "ENCPDF" (6) + salt (16) + iv (12) + ciphertext
-	const magic = String.fromCharCode(...fileData.slice(0, 6));
-	if (magic !== 'ENCPDF') throw new Error('Invalid file format');
-
-	const salt = fileData.slice(6, 22);
-	const iv = fileData.slice(22, 34);
-	const ciphertext = fileData.slice(34);
-
-	// Derive key
-	const enc = new TextEncoder();
-	const keyMaterial = await crypto.subtle.importKey(
-            'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
-	);
-	const key = await crypto.subtle.deriveKey(
-            { name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' },
-            keyMaterial,
-            { name: 'AES-GCM', length: 256 },
-            false,
-            ['decrypt']
-	);
-
-	// Decrypt
+	const fileData = b2u(B64);
+	if (String.fromCharCode(...fileData.slice(0, 6)) !== 'ENCPDF') throw new Error('Invalid file');
+	const key = await deriveKey(passwordInputs.value, fileData.slice(6, 22));
 	let decrypted;
 	try {
-            decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-	} catch {
-            throw new Error('WRONG_PIN');
-	}
-
+            decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fileData.slice(22, 34) }, key, fileData.slice(34));
+        } catch {
+            throw new Error('WRONG');
+        }
 	loadingMsg.textContent = 'Open PDF...';
-
-	// Show PDF
-	const blob = new Blob([decrypted], { type: 'application/pdf' });
-	const url = URL.createObjectURL(blob);
-	window.open(url);
-	setTimeout(() => URL.revokeObjectURL(url), 10000);
-	
-	loadingMsg.textContent = '';
-	errorMsg.className = 'status success';
+	const url = URL.createObjectURL(new Blob([decrypted], { type: 'application/pdf' }));
+        window.open(url);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        loadingMsg.textContent = '';
     } catch (err) {
 	loadingMsg.textContent = '';
-	if (err.message === 'WRONG_PIN') {
-            errorMsg.textContent = '✗ Wrong PASSWORD';
-	    errorMsg.className = 'status error';
-	} else {
-            errorMsg.textContent = '✗ ' + err.message;
-	    errorMsg.className = 'status error';
-	}
+	errorMsg.textContent = err.message === "WRONG"?"✗ Wrong PASSWORD":'✗ ' + err.message;
+	errorMsg.className = 'status error';
 	shakePassword();
-	clearPassword();
+	passwordInputs.value = '';
+        passwordInputs.focus();
     }
 });
