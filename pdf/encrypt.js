@@ -1,46 +1,13 @@
-// --- PIN Input Logic ---
-function setupPinInputs(containerId) {
-    const inputs = document.querySelectorAll(`#${containerId} input`);
-    inputs.forEach((input, i) => {
-	input.addEventListener('input', () => {
-            const val = input.value.replace(/[^0-9]/g, '');
-            input.value = val.slice(-1);
-            if (val && i < inputs.length - 1) inputs[i + 1].focus();
-            checkPins();
-	});      input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !input.value && i > 0) {
-		inputs[i - 1].focus();
-            }
-	});
-	input.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-            [...pasted].forEach((ch, j) => {
-		if (inputs[j]) inputs[j].value = ch;
-            });
-            checkPins();
-	});
-    });
-}
-
-setupPinInputs('pin1Inputs');
-setupPinInputs('pin2Inputs');
-
-function getPin(containerId) {
-    return [...document.querySelectorAll(`#${containerId} input`)]
-	.map(i => i.value).join('');
-}
-
-function checkPins() {
-    const p1 = getPin('pin1Inputs');
-    const p2 = getPin('pin2Inputs');
+function checkPassword() {
+    const p1 = document.getElementById("passwordInput").value;
+    const p2 = document.getElementById("passwordConfirm").value;
     const match = document.getElementById('pinMatch');
-    if (p1.length === 6 && p2.length === 6) {
+    if (p1.length === p2.length) {
 	if (p1 === p2) {
-            match.textContent = '✓ PINs match';
+            match.textContent = '✓ Passwords match';
             match.className = 'pin-match ok';
 	} else {
-            match.textContent = '✗ PINs do not match';
+            match.textContent = '✗ Passwords do not match';
             match.className = 'pin-match fail';
 	}
     } else {
@@ -49,6 +16,8 @@ function checkPins() {
     }
     updateBtn();
 }
+
+document.getElementById("passwordConfirm").addEventListener("input", (e) => checkPassword());
 
 // --- File Selection ---
 let selectedFile = null;
@@ -82,15 +51,15 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 function updateBtn() {
-    const p1 = getPin('pin1Inputs');
-    const p2 = getPin('pin2Inputs');
+    const p1 = document.getElementById("passwordInput").value;
+    const p2 = ocument.getElementById("passwordConfirm").value;
     document.getElementById('encryptBtn').disabled =
-	!(selectedFile && p1.length === 6 && p2.length === 6 && p1 === p2);
+	!(selectedFile && p1 === p2);
 }
 
 // --- Encryption ---
 document.getElementById('encryptBtn').addEventListener('click', async () => {
-    const pin = getPin('pin1Inputs');
+    const password = document.getElementById("passwordInput").value;
     const status = document.getElementById('status');
     const progressBar = document.getElementById('progressBar');
     const progressFill = document.getElementById('progressFill');
@@ -107,10 +76,10 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 	progressFill.style.width = '30%';
 	status.textContent = 'Derive key (PBKDF2)...';
 
-	// Derive key from PIN
+	// Derive key from Password
 	const enc = new TextEncoder();
 	const keyMaterial = await crypto.subtle.importKey(
-            'raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']
+            'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
 	);
 
 	const salt = crypto.getRandomValues(new Uint8Array(16));
