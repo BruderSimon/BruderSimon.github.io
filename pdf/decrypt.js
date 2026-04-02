@@ -5,6 +5,14 @@ const loadingMsg = document.getElementById('loadingMsg');
 
 passwordInputs.focus();
 
+function uint8ToBase64(bytes) {
+    let binary = '';
+    const chunk = 8192;
+    for (let i = 0; i < bytes.length; i += chunk)
+	binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+    return btoa(binary);
+}
+
 function shakePassword() {
     passwordInputs.classList.add('shake');
     passwordInputs.addEventListener('animationend', () => passwordInputs.classList.remove('shake'), { once: true });
