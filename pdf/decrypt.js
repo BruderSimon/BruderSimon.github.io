@@ -14,7 +14,8 @@ const b2u = b => Uint8Array.from(atob(b), c => c.charCodeAt(0));
 
 async function deriveKey(password, salt) {
     const result = await argon2.hash({
-        pass: password, uint8ToBase64(salt),
+        pass: password,
+	salt: uint8ToBase64(salt),
         type: argon2.ArgonType.Argon2id,
         hashLen: 32, time: 3, mem: 65536, parallelism: 1});
     return crypto.subtle.importKey("raw", result.hash, { name: "AES-GCM" }, false, ["decrypt"]);

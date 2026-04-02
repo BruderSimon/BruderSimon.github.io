@@ -136,8 +136,6 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 	progressFill.style.width = '95%';
 	status.textContent = 'Create download...';
 
-	const css_long = "<style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: monospace; font-size: 1.2rem; background-color: #181820; color:  #DCD7BA; display: flex; align-items: center; justify-content: center; min-height: 100vh; }  h1 { font-size: 1.5em; margin-bottom: 1rem; color: #FF5D62; } @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); }} .card { padding: 2rem; } .tag { font-size: 0.7rem; color: #9CABCA; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; } .password-input { width: 50%; padding: 0.6rem; background: #363646; border-color: #D27E99; color:  #DCD7BA; outline: none; font-size: 1rem; } .password-input.shake { animation: shake 0.4s ease; } .btn { width: 100%; padding: 1rem; background: #363646; border: none; font-family: monospace; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; margin-top: 1.5rem; } .btn:hover { background: #FFA066; } .status { font-size: 0.75rem; margin-top: 0.75rem; min-height: 1.2rem; } .status.success { color: #98BB6C; } .status.error { color: #E82424;}</style>";
-
 	const css_fetch = await fetch('https://simonengel.net/style.css');
 	const js_fetch = await fetch('https://simonengel.net/pdf/decrypt.js');
 	const argon2_fetch = await fetch('https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js');
@@ -148,9 +146,33 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 	const argon2_content = await argon2_fetch.text();
 	
 	const css_short = `<link rel="stylesheet"; href="https://simonengel.net/style.css">`;
-	const js_short = `<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js"></script><script>const B64 ="${b64}";</script><script src="https://simonengel.net/pdf/decrypt.js"></script>`;
-	const js_long = `<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js"></script><script>const B64 ="${b64}";const passwordInputs = document.getElementById("passwordInput");const unlockBtn = document.getElementById('unlockBtn');const errorMsg = document.getElementById('errorMsg');const loadingMsg = document.getElementById('loadingMsg');passwordInputs.focus();function shakePassword(){passwordInputs.classList.add('shake');passwordInputs.addEventListener('animationend', () => passwordInputs.classList.remove('shake'), { once: true });}const b2u = b => Uint8Array.from(atob(b), c => c.charCodeAt(0));async function deriveKey(password, salt) {const result = await argon2.hash({pass: password, uint8ToBase64(salt),type: argon2.ArgonType.Argon2id,hashLen: 32, time: 3, mem: 65536, parallelism: 1});return crypto.subtle.importKey("raw", result.hash, { name: "AES-GCM" }, false, ["decrypt"]);}unlockBtn.addEventListener('click', async () => {errorMsg.textContent = ''; loadingMsg.textContent = 'Decrypt...'; try {const fileData = b2u(B64);if (String.fromCharCode(...fileData.slice(0, 6)) !== 'ENCPDF') throw new Error('Invalid file');	const key = await deriveKey(passwordInputs.value, fileData.slice(6, 22)); let decrypted;try {decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fileData.slice(22, 34) }, key, fileData.slice(34));} catch {throw new Error('WRONG');}loadingMsg.textContent = 'Open PDF...'; const url = URL.createObjectURL(new Blob([decrypted], { type: 'application/pdf' })); window.open(url); setTimeout(() => URL.revokeObjectURL(url), 10000); loadingMsg.textContent = ''; } catch (err) { loadingMsg.textContent = ''; errorMsg.textContent = err.message === "WRONG"?"✗ Wrong PASSWORD":'✗ ' + err.message; errorMsg.className = 'status error'; shakePassword(); passwordInputs.value = ''; passwordInputs.focus();}});`;
-	const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Decrypt</title><style>${css_content}</style></head><body><div id="lockScreen"><div class="card"><div class="header"><div class="tag">Protected content</div><h1>Enter <span style="color: var(--surimiOrange)">Password</span></h1></div><input id="passwordInput" class="password-input" type="password" placeholder="Password"><button class="btn" id="unlockBtn">Decrypt</button><div class="status"id="errorMsg"></div><div class="loading-msg" id="loadingMsg"></div></div></div><script>${argon2_content} const B64 ="${b64}" ${js_content}</script></body></html>`;
+	const js_short = `<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js"></script>\n<script>const B64 ="${b64}"; </script><script src="https://simonengel.net/pdf/decrypt.js"></script>`;
+	
+	const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decrypt</title>
+<style>${css_content}</style>
+</head>
+<body>
+  <div id="lockScreen">
+    <div class="card">
+      <div class="header">
+        <div class="tag">Protected content</div>
+        <h1>Enter <span style="color: var(--surimiOrange)">Password</span></h1>
+      </div>
+      <input id="passwordInput" class="password-input" type="password" placeholder="Password">
+      <button class="btn" id="unlockBtn">Decrypt</button>
+      <div class="status"id="errorMsg"></div>
+      <div class="loading-msg" id="loadingMsg"></div>
+    </div>
+  </div>
+  <script>${argon2_content}</script>
+  <script> const B64 ="${b64}";
+  ${js_content}</script>
+</body>
+</html>`;
 	
 	const blob = new Blob([html], { type: 'application/octet-stream' });
 	const url = URL.createObjectURL(blob);
