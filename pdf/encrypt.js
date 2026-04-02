@@ -19,6 +19,7 @@ function checkPassword() {
 
 passwordInput.addEventListener('input', checkPassword);
 passwordConfirm.addEventListener('input', checkPassword);
+
 // --- File Selection ---
 let selectedFile = null;
 
@@ -82,6 +83,18 @@ async function deriveKey(password, salt){
 	["encrypt","decrypt"]
     );
 }
+function buildRevokeSnippet(blobDurationMs) {
+    if (blobDurationMs === -1) {
+        // Never revoke — URL stays alive until tab is closed
+        return `// PDF link stays active until the tab is closed`;
+    } else if (blobDurationMs === 0) {
+        // Revoke immediately after opening
+        return `URL.revokeObjectURL(url);`;
+    } else {
+        // Revoke after timeout
+        return `setTimeout(() => URL.revokeObjectURL(url), ${blobDurationMs});`;
+    }
+}
 
 // --- Encryption ---
 document.getElementById('encryptBtn').addEventListener('click', async () => {
@@ -91,6 +104,10 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
     const progressFill = document.getElementById('progressFill');
     const btn = document.getElementById('encryptBtn');
 
+    const settings = window.advancedSettings || { mode: 'selfcontained', blobDurationMs: 10000 };
+    const isSelfContained = settings.mode !== 'linked';
+    const blobDurationMs  = typeof settings.blobDurationMs === 'number' ? settings.blobDurationMs : 10000;
+    
     btn.disabled = true;
     progressBar.classList.add('show');
     status.textContent = 'Read File...';
@@ -108,7 +125,7 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 
 	const key = await  deriveKey(password, salt);
 
-	progressFill.style.width = '60%';
+	progressFill.style.width = '50%';
 	status.textContent = 'Encrypt...';
 
 	const encrypted = await crypto.subtle.encrypt(
@@ -117,7 +134,7 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
             fileData
 	);
 
-	progressFill.style.width = '75%';
+	progressFill.style.width = '65%';
 	status.textContent = 'Generate file...';
 
 	// Format: "ENCPDF" magic + salt (16) + iv (12) + ciphertext
@@ -133,27 +150,48 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 
 	const b64 = uint8ToBase64(result);
 	
-	progressFill.style.width = '95%';
-	status.textContent = 'Create download...';
+	progressFill.style.width = '85%';
+	status.textContent = 'Fetch resources...';
 
 	const css_fetch = await fetch('https://simonengel.net/style.css');
 	const js_fetch = await fetch('https://simonengel.net/pdf/decrypt.js');
 	const argon2_fetch = await fetch('https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js');
 	
 	if (!css_fetch.ok || !js_fetch.ok || !argon2_fetch.ok) throw new Error('Network response was not ok');
-	const css_content = await css_fetch.text(); 
-	const js_content = await js_fetch.text();
+
+	const css_content    = await css_fetch.text();
+	let   js_content     = await js_fetch.text();
 	const argon2_content = await argon2_fetch.text();
-	
-	const css_short = `<link rel="stylesheet"; href="https://simonengel.net/style.css">`;
-	const js_short = `<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js"></script>\n<script>const B64 ="${b64}"; </script><script src="https://simonengel.net/pdf/decrypt.js"></script>`;
+
+	const revokeSnippet = buildRevokeSnippet(blobDurationMs);
+	js_content = js_content.replace(
+            /setTimeout\(\(\) => URL\.revokeObjectURL\(url\),\s*\d+\);/,
+            revokeSnippet
+	);
+
+	progressFill.style.width = '95%';
+	status.textContent = 'Create download...';
+
+	let styleTag, argon2Tag, decryptTag;
+
+	if (isSelfContained) {
+            // Embed everything inline — works fully offline
+            styleTag   = `<style>${css_content}</style>`;
+            argon2Tag  = `<script>${argon2_content}<\/script>`;
+            decryptTag = `<script>const B64 = "${b64}";\n${js_content}<\/script>`;
+	} else {
+            // Link to external resources — requires internet
+            styleTag   = `<link rel="stylesheet" href="https://simonengel.net/style.css">`;
+            argon2Tag  = `<script src="https://cdn.jsdelivr.net/npm/argon2-browser/dist/argon2-bundled.min.js"><\/script>`;
+            decryptTag = `<script>const B64 = "${b64}";<\/script><script src="https://simonengel.net/pdf/decrypt.js"><\/script>`;
+	}
 	
 	const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Decrypt</title>
-<style>${css_content}</style>
+${styleTag}
 </head>
 <body>
   <div id="lockScreen">
@@ -168,9 +206,8 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
       <div class="loading-msg" id="loadingMsg"></div>
     </div>
   </div>
-  <script>${argon2_content}</script>
-  <script> const B64 ="${b64}";
-  ${js_content}</script>
+  ${argon2Tag}
+  ${decryptTag}
 </body>
 </html>`;
 	
@@ -193,3 +230,78 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
     }
     btn.disabled = false;
 });
+
+const DURATION_STEPS = [
+  { ms: 0,       label: 'Sofort',  badge: 'Sofort' },
+  { ms: 3000,    label: '3 Sek.',  badge: '3 Sek.' },
+  { ms: 10000,   label: '10 Sek.', badge: '10 Sek.' },
+  { ms: 30000,   label: '30 Sek.', badge: '30 Sek.' },
+  { ms: 60000,   label: '1 Min.',  badge: '1 Min.' },
+  { ms: 120000,  label: '2 Min.',  badge: '2 Min.' },
+  { ms: 300000,  label: '5 Min.',  badge: '5 Min.' },
+];
+
+// Global settings object — read by encrypt.js
+window.advancedSettings = {
+  mode: 'selfcontained',
+  blobDurationMs: 10000,
+};
+
+// ── Panel toggle ──
+document.getElementById('advancedToggle').addEventListener('click', () => {
+  document.getElementById('advancedToggle').classList.toggle('open');
+  document.getElementById('advancedPanel').classList.toggle('open');
+});
+
+// ── Output mode ──
+window.setMode = function(mode) {
+  window.advancedSettings.mode = mode;
+  document.getElementById('btnSelfContained').classList.toggle('active', mode === 'selfcontained');
+  document.getElementById('btnLinked').classList.toggle('active', mode === 'linked');
+
+  const badge = document.getElementById('modeBadge');
+  const desc  = document.getElementById('modeDescription');
+
+  if (mode === 'selfcontained') {
+    badge.textContent = 'Self-contained';
+    badge.className = 'setting-badge badge-green';
+    desc.innerHTML = 'CSS, JavaScript and Argon2 will be embedded into the HTML-Page. This file works <strong>completely offline</strong> — increases file size.';
+  } else {
+    badge.textContent = 'Requires network';
+    badge.className = 'setting-badge badge-yellow';
+    desc.innerHTML = 'The HTML-file contains links to <code>simonengel.net</code> and jsDelivr. Smaller file size — but <strong>Requires a network connection</strong>.';
+  }
+};
+
+window.updateDurationSlider = function(idx) {
+  const step = DURATION_STEPS[parseInt(idx)];
+  window.advancedSettings.blobDurationMs = step.ms;
+
+  document.getElementById('sliderValueDisplay').textContent = step.label;
+  document.getElementById('durationBadge').textContent = step.badge;
+
+  const descText = step.ms === 0
+    ? 'The temproal PDF-URL will be inavlid <strong>immediately</strong> after opening.'
+    : `After opening the temporal PDF-URL will be invalid after <strong>${step.label}</strong>`;
+  document.getElementById('durationDescription').innerHTML = descText;
+};
+
+window.onNeverExpireChange = function() {
+  const never  = document.getElementById('neverExpireCheck').checked;
+  const slider = document.getElementById('blobDurationSlider');
+
+  slider.disabled    = never;
+  slider.style.opacity = never ? '0.35' : '1';
+
+  if (never) {
+    window.advancedSettings.blobDurationMs = -1;
+    document.getElementById('sliderValueDisplay').textContent = '∞';
+    document.getElementById('durationBadge').textContent = '∞';
+    document.getElementById('durationDescription').innerHTML =
+      'The URL will <strong>never</strong> be invalidated — the PDF stays in memory until the Tab is closed.';
+  } else {
+    updateDurationSlider(document.getElementById('blobDurationSlider').value);
+  }
+};
+
+updateDurationSlider(2);

@@ -40,7 +40,75 @@
 	     placeholder="Confirm password">
       <div class="pin-match" id="pinMatch"></div>
     </div>
+    
+    <button class="advanced-toggle" id="advancedToggle" type="button">
+      <span class="chevron">▶</span>
+      Advanced Settings
+    </button>
 
+       <div class="advanced-panel" id="advancedPanel">
+      <div class="advanced-panel-inner">
+
+        <!-- Output Mode -->
+        <div class="setting-row">
+          <div class="setting-label">
+            Output-Mode
+            <span class="setting-badge badge-green" id="modeBadge">Self-contained</span>
+          </div>
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="btnSelfContained" type="button" onclick="setMode('selfcontained')">
+              <span class="mode-icon">📦</span>
+              Self-contained
+            </button>
+            <button class="mode-btn" id="btnLinked" type="button" onclick="setMode('linked')">
+              <span class="mode-icon">🔗</span>
+              Linked (online)
+            </button>
+          </div>
+          <div class="setting-description" id="modeDescription">
+            CSS, JavaScript and Argon2 will be embedded into the HTML-Page.
+            This file works <strong>completely offline</strong> — increases file size.
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Blob URL Duration -->
+        <div class="setting-row">
+          <div class="setting-label">
+            PDF-URL valid time
+            <span class="setting-badge badge-orange" id="durationBadge">10 sec.</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="blobDurationSlider" min="0" max="6" value="2"
+              oninput="updateDurationSlider(this.value)">
+            <span class="slider-value" id="sliderValueDisplay">10 sec.</span>
+          </div>
+          <div class="slider-hints">
+            <span>Immediately</span>
+            <span>3s</span>
+            <span>10s</span>
+            <span>30s</span>
+            <span>1 Min.</span>
+            <span>2 Min.</span>
+            <span>5 Min.</span>
+          </div>
+          <div class="never-row">
+            <label>
+              <input type="checkbox" id="neverExpireCheck"
+                onchange="onNeverExpireChange()">
+              Never invalidates — URL stays active until tab is closed
+            </label>
+          </div>
+          <div class="setting-description" id="durationDescription">
+	    After decryption temproal PDF-URL will be invalidated after
+            <strong>10 Seconds</strong>.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
     <button class="btn" id="encryptBtn" disabled>Encrypt file & download</button>
     <div class="progress-bar" id="progressBar">
       <div class="progress-fill" id="progressFill"></div>
@@ -49,12 +117,12 @@
   </div>
 
   <div class="info-box">
+    <b>Important: I do not gurantee strong cryptographic security. Use at your own risk</b><br> 
     <strong>To continue:</strong>
     <ol class="step-list">
-      <li>Verschlüsselte Datei <code>presentation.enc</code> herunterladen</li>
-      <li>Datei + <code>viewer.html</code> ins GitHub-Repo laden</li>
-      <li>In <code>viewer.html</code> den Dateinamen anpassen</li>
-      <li>Fertig — nur du kommst rein mit dem PIN</li>
+      <li>Download the file</li>
+      <li>Open <code>.html</code> file with any browser</li>
+      <li>Enter password and view the pdf</li>
     </ol>
   </div>
 </div>
