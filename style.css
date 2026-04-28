@@ -62,7 +62,6 @@ body {
 
 .avatar {
     text-align: center;
-    padding: 1rem;
 }
 
 .avatar img {
@@ -198,6 +197,57 @@ li p {
     width: 100%;
 }
 
+/* Project */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.modal-overlay:target { display: flex; }
+
+.modal {
+    background: var(--sumiInk-3);
+    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    max-width: 520px;
+    width: 100%;
+    padding: 2rem;
+    color: var(--fujiWhite);
+    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+.modal h2 { color: var(--carpYellow); margin: 0 0 0.5rem; }
+.modal .modal-meta { font-family: monospace; color: var(--springGreen); font-size: 0.85em; margin-bottom: 1.25rem; }
+.modal .modal-body { font-size: 0.95em; line-height: 1.7; opacity: 0.9; margin-bottom: 1.5rem; }
+.modal .modal-link {
+    display: inline-block;
+    font-family: monospace;
+    color: var(--carpYellow);
+    border: 0.5px solid var(--carpYellow);
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+}
+.modal .modal-link:hover { background: rgba(230, 195, 132, 0.12); }
+.modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-family: monospace;
+    color: var(--fujiWhite);
+    opacity: 0.5;
+    font-size: 1.4em;
+    text-decoration: none;
+    line-height: 1;
+}
+.modal-close:hover { opacity: 1; }
+
 /* Blog specific styles */
 .blog-grid {
     display: grid;
@@ -241,6 +291,7 @@ li p {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    justify-content: center;
 }
 
 .tag {

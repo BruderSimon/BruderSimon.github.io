@@ -9,7 +9,8 @@
     <meta http-equiv="Referrer-Policy" content="no-referrer">
     <title>Simon Engel - Projects</title>
     <meta name="description" content="Projects of Simon Engel">
-    <link rel="stylesheet" href="./style.css"> 
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="modal.css"> 
   </head>
   <body>
     <div class="container">
@@ -17,8 +18,97 @@
 	<a href="https://simonengel.net" rel="noopener noreferrer">/home</a>	
       </div>
       <div>
-	<br>
-	<h1>Under Construction</h1>
+	<div class="blog-grid">
+	  <!-- Project: PDF Encryption -->
+	  <a class="blog-card" href="#pdf-encrypt">
+            <section>
+              <h2>PDF Encryptor</h2>
+              <p>Encrypt PDF files into a single HTML page, for a safer
+                distribution over the web.</p>
+            </section>
+            <section class="pages">/pdf/encrypt-tool</section>
+	  </a>
+	  
+	  <div class="modal-overlay" id="pdf-encrypt">
+	    <a href="#" class="modal-overlay-close"></a>
+	    <div class="modal">
+              <a class="modal-close" href="#">✕</a>
+              <h2>PDF Encryptor</h2>
+              <div class="modal-meta">/pdf/encrypt-tool</div>
+              <div class="modal-body">
+		<p>
+		  This tool encrypts a PDF directly inside the
+		  browser and exports it as a standalone HTML file that
+		  can later decrypt and open the document after the
+		  correct password is entered. This tool is works
+		  entirely in your local browser, so no data is uploaded
+		  anywhere. The output contains the protected PDF data
+		  plus the code needed to unlock it later
+		</p>
+		<p>
+		  The protection relies on AES-256-GCM, a modern
+		  authenticated encryption standard, while the
+		  password is converted into an encryption key using
+		  Argon2id. That matters because passwords are usually
+		  weak compared to real cryptographic keys. Argon2id
+		  deliberately makes password guessing slower and more
+		  expensive, and the use of a random salt prevents
+		  precomputed attacks against reused passwords.
+		</p>
+		<p>
+		  In practice, attackers are unlikely to break AES
+		  itself. The realistic threat is offline
+		  brute-forcing the password, since anyone with the
+		  encrypted file can try unlimited guesses on their
+		  own hardware. Weak passwords such as common words,
+		  names, or predictable patterns can fall
+		  quickly. Strong passwords or long random passphrases
+		  make this attack dramatically harder.
+		</p>
+		<strong>However, I do not gurantee any cryptographical
+		soundness or what so ever. Use it on your own
+		risk</strong>
+              </div>
+              <div class="tags">
+		<span class="tag">JavaScript</span>
+		<span class="tag">AES-256</span>
+		<span class="tag">Privacy</span>
+              </div>
+	      <div class="avatar">
+		<a class="modal-link" href="pdf/encrypt-tool" rel="noopener noreferrer">Go to Project</a>
+	      </div>
+	    </div>
+	  </div>
+	  
+	  <!-- Project LaTeX templates -->
+	  <a class="blog-card" href="#latex-template">
+            <section>
+              <h2>LaTeX Templates</h2>
+              <p>Template repository for LaTeX</p>
+            </section>
+            <section class="pages">/project/latex-template</section>
+	  </a>
+	  <div class="modal-overlay" id="latex-template">
+	    <a href="#" class="modal-overlay-close"></a>
+	    <div class="modal">
+              <a class="modal-close" href="#">✕</a>
+              <h2>LaTeX Templates</h2>
+              <div class="modal-meta">/projects/latex-templates</div>
+              <div class="modal-body">
+		This is a repository to collect LaTeX templates. As
+		long as the README doesn't say otherwise, the template
+		was made by me and is licensed under the MIT licence.
+              </div>
+              <div class="tags">
+		<span class="tag">LaTeX</span>
+              </div>
+	      <div class="avatar">
+		<a class="modal-link" href="https://github.com/BruderSimon/LaTexTemplates" rel="noopener noreferrer">Go to Project</a>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
       </div>
     </div>
   </body>
