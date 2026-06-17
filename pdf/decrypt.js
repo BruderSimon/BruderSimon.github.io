@@ -20,6 +20,15 @@ function shakePassword() {
 
 const b2u = b => Uint8Array.from(atob(b), c => c.charCodeAt(0));
 
+// Gzip-decompress bytes using the browser-native DecompressionStream API.
+async function gzipDecompress(bytes) {
+    const ds = new DecompressionStream('gzip');
+    const writer = ds.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+}
+
 async function deriveKey(password, salt) {
     const result = await argon2.hash({
         pass: password,
@@ -34,7 +43,9 @@ unlockBtn.addEventListener('click', async () => {
     loadingMsg.textContent = 'Decrypt...';
     try {
 	const fileData = b2u(B64);
-	if (String.fromCharCode(...fileData.slice(0, 6)) !== 'ENCPDF') throw new Error('Invalid file');
+	const magic = String.fromCharCode(...fileData.slice(0, 6));
+	// "ENCPDF" = raw, "ENCPDZ" = gzip-compressed plaintext.
+	if (magic !== 'ENCPDF' && magic !== 'ENCPDZ') throw new Error('Invalid file');
 	const key = await deriveKey(passwordInputs.value, fileData.slice(6, 22));
 	let decrypted;
 	try {
@@ -42,8 +53,13 @@ unlockBtn.addEventListener('click', async () => {
         } catch {
             throw new Error('WRONG');
         }
+	let pdfBytes = new Uint8Array(decrypted);
+	if (magic === 'ENCPDZ') {
+	    loadingMsg.textContent = 'Decompress...';
+	    pdfBytes = await gzipDecompress(pdfBytes);
+	}
 	loadingMsg.textContent = 'Open PDF...';
-	const url = URL.createObjectURL(new Blob([decrypted], { type: 'application/pdf' }));
+	const url = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
         window.open(url);
         setTimeout(() => URL.revokeObjectURL(url), 10000);
         loadingMsg.textContent = '';

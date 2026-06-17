@@ -65,6 +65,17 @@ function uint8ToBase64(bytes) {
     return btoa(binary);
 }
 
+// Gzip-compress bytes using the browser-native CompressionStream API.
+async function gzipCompress(bytes) {
+    if (typeof CompressionStream === 'undefined')
+	throw new Error('Compression not supported by this browser');
+    const cs = new CompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+}
+
 async function deriveKey(password, salt){
     const result = await argon2.hash({
 	pass: password,
@@ -104,9 +115,10 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
     const progressFill = document.getElementById('progressFill');
     const btn = document.getElementById('encryptBtn');
 
-    const settings = window.advancedSettings || { mode: 'selfcontained', blobDurationMs: 10000 };
+    const settings = window.advancedSettings || { mode: 'selfcontained', blobDurationMs: 10000, compress: false };
     const isSelfContained = settings.mode !== 'linked';
     const blobDurationMs  = typeof settings.blobDurationMs === 'number' ? settings.blobDurationMs : 10000;
+    const useCompression  = settings.compress === true;
     
     btn.disabled = true;
     progressBar.classList.add('show');
@@ -115,8 +127,18 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
     progressFill.style.width = '10%';
 
     try {
-	const fileData = await selectedFile.arrayBuffer();
+	let fileData = await selectedFile.arrayBuffer();
 	progressFill.style.width = '30%';
+
+	// Optionally compress the plaintext PDF before encryption.
+	// (Encrypting first would make the ciphertext incompressible.)
+	if (useCompression) {
+	    status.textContent = 'Compress...';
+	    const original = fileData.byteLength;
+	    fileData = await gzipCompress(new Uint8Array(fileData));
+	    console.log(`Compressed ${original} → ${fileData.byteLength} bytes (${Math.round(100 * fileData.byteLength / original)}%)`);
+	}
+
 	status.textContent = 'Derive key (Argon2)...';
 
 	// Derive key from Password
@@ -137,8 +159,9 @@ document.getElementById('encryptBtn').addEventListener('click', async () => {
 	progressFill.style.width = '65%';
 	status.textContent = 'Generate file...';
 
-	// Format: "ENCPDF" magic + salt (16) + iv (12) + ciphertext
-	const magic = new TextEncoder().encode('ENCPDF');
+	// Format: magic (6) + salt (16) + iv (12) + ciphertext
+	// Magic "ENCPDF" = raw, "ENCPDZ" = gzip-compressed plaintext.
+	const magic = new TextEncoder().encode(useCompression ? 'ENCPDZ' : 'ENCPDF');
 	const result = new Uint8Array(
             magic.length + salt.length + iv.length + encrypted.byteLength
 	);
@@ -245,6 +268,17 @@ const DURATION_STEPS = [
 window.advancedSettings = {
   mode: 'selfcontained',
   blobDurationMs: 10000,
+  compress: false,
+};
+
+// ── Compression toggle ──
+window.onCompressChange = function() {
+  const on = document.getElementById('compressCheck').checked;
+  window.advancedSettings.compress = on;
+
+  const badge = document.getElementById('compressBadge');
+  badge.textContent = on ? 'On' : 'Off';
+  badge.className = 'setting-badge ' + (on ? 'badge-green' : 'badge-yellow');
 };
 
 // ── Panel toggle ──

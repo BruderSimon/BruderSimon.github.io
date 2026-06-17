@@ -106,6 +106,29 @@
           </div>
         </div>
 
+        <div class="panel-divider"></div>
+
+        <!-- Compression -->
+        <div class="setting-row">
+          <div class="setting-label">
+            Compression
+            <span class="setting-badge badge-yellow" id="compressBadge">Off</span>
+          </div>
+          <div class="never-row">
+            <label>
+              <input type="checkbox" id="compressCheck"
+                onchange="onCompressChange()">
+              Gzip-compress the PDF before encryption
+            </label>
+          </div>
+          <div class="setting-description">
+            Shrinks the embedded data for a smaller HTML file. Effectiveness
+            depends on the PDF — text-heavy or scanned files compress well,
+            already-optimized ones less so. Uses the browser's built-in
+            compression (no extra libraries).
+          </div>
+        </div>
+
       </div>
     </div>
     
